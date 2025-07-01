@@ -44,6 +44,8 @@ setup(
         'osf': [
             'Django>=3.2',
             'Flask>=1.0',
+            'Babel>=2.5.1',  # For i18n support
+            'Mako>=1.0',     # For template support
         ],
         'waterbutler': [
             'aiohttp>=3.8',
@@ -52,9 +54,11 @@ setup(
         'dev': [
             'pytest>=6.0',
             'pytest-asyncio>=0.18',
+            'aiohttpretty>=0.1.1',  # For waterbutler integration tests
             'pytest-cov>=2.10',
             'flake8>=3.8',
             'black>=21.0',
+            'Babel>=2.5.1',  # For i18n development
         ],
         'test': [
             'pytest>=6.0',
@@ -69,6 +73,9 @@ setup(
     entry_points={
         'waterbutler.providers': [
             's3compat = s3compat.waterbutler_provider:S3CompatProvider',
+        ],
+        'rdm.admin_integrations': [
+            's3compat = s3compat.osf_addon.admin_integration:get_admin_integration_info',
         ],
     },
     

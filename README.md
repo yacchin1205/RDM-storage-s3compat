@@ -57,9 +57,42 @@ Add to your OSF settings:
 INSTALLED_APPS += [
     's3compat.osf_addon',
 ]
-
-# Ensure addons.json includes s3compat in available addons list
 ```
+
+### addons.json Configuration
+
+When s3compat was integrated into the main OSF repository, the following entries were included in `addons.json`. This serves as an example for future storage addon integrations:
+
+```json
+{
+    "addons": [
+        "s3compat",
+        // ... other addons
+    ],
+    "addons_archivable": {
+        "s3compat": "partial",
+        // ... other addons
+    },
+    "addons_commentable": [
+        "s3compat",
+        // ... other addons
+    ],
+    "addons_description": {
+        "s3compat": "S3 Compatible Storage is a file storage add-on. Connect your S3 Compatible Storage account to a GakuNin RDM project to interact with files hosted on S3 Compatible Storage via the GakuNin RDM.",
+        // ... other addon descriptions
+    },
+    "addons_url": {
+        "s3compat": "https://aws.amazon.com/s3/",
+        // ... other addon URLs  
+    },
+    "addons_folder_field": {
+        "s3compat": "folder_name",
+        // ... other addon folder fields
+    }
+}
+```
+
+**Note**: Since this package has been separated into an independent addon, these entries should be removed from the main OSF `addons.json` and the addon is now discovered automatically through Python entry points.
 
 ### Waterbutler Configuration
 

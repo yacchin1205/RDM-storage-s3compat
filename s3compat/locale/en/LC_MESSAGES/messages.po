@@ -1,0 +1,113 @@
+# English translations for s3compat.
+# Copyright (C) 2024 NII RDM Team
+# This file is distributed under the same license as the s3compat project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: s3compat 1.0.0\n"
+"Report-Msgid-Bugs-To: nii-rdm@nii.ac.jp\n"
+"POT-Creation-Date: 2024-07-01 12:00+0000\n"
+"PO-Revision-Date: 2024-07-01 12:00+0000\n"
+"Last-Translator: NII RDM Team <nii-rdm@nii.ac.jp>\n"
+"Language: en\n"
+"Language-Team: English <nii-rdm@nii.ac.jp>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: s3compat/osf_addon/templates/s3compat_credentials_modal.mako:6
+msgid "Connect an S3 Compatible Storage Account"
+msgstr "Connect an S3 Compatible Storage Account"
+
+#: s3compat/osf_addon/templates/s3compat_credentials_modal.mako:17
+msgid "S3 Compatible Service"
+msgstr "S3 Compatible Service"
+
+#: s3compat/osf_addon/templates/s3compat_credentials_modal.mako:21
+msgid "Host"
+msgstr "Host"
+
+#: s3compat/osf_addon/templates/s3compat_credentials_modal.mako:25
+msgid "Access Key"
+msgstr "Access Key"
+
+#: s3compat/osf_addon/templates/s3compat_credentials_modal.mako:40
+#: s3compat/osf_addon/templates/s3compat_node_settings.mako:77
+msgid "Cancel"
+msgstr "Cancel"
+
+#: s3compat/osf_addon/templates/s3compat_credentials_modal.mako:43
+#: s3compat/osf_addon/templates/s3compat_node_settings.mako:79
+msgid "Save"
+msgstr "Save"
+
+#: s3compat/osf_addon/templates/s3compat_node_settings.mako:14
+#: s3compat/osf_addon/templates/s3compat_user_settings.mako:18
+msgid "S3 Compatible Storage"
+msgstr "S3 Compatible Storage"
+
+#: s3compat/osf_addon/templates/s3compat_node_settings.mako:21
+msgid "Current Folder: "
+msgstr "Current Folder: "
+
+#: s3compat/osf_addon/templates/s3compat_node_settings.mako:28
+msgid "Disconnect Account"
+msgstr "Disconnect Account"
+
+#: s3compat/osf_addon/templates/s3compat_node_settings.mako:35
+msgid "Change"
+msgstr "Change"
+
+#: s3compat/osf_addon/templates/s3compat_node_settings.mako:45
+msgid "Current Bucket:"
+msgstr "Current Bucket:"
+
+#: s3compat/osf_addon/templates/s3compat_node_settings.mako:50
+msgid "Create Bucket"
+msgstr "Create Bucket"
+
+#: s3compat/osf_addon/templates/s3compat_node_settings.mako:58
+msgid "Bucket Name"
+msgstr "Bucket Name"
+
+#: s3compat/osf_addon/templates/s3compat_node_settings.mako:72
+msgid "Submit"
+msgstr "Submit"
+
+#: s3compat/osf_addon/templates/s3compat_user_settings.mako:12
+msgid "Configure Add-on"
+msgstr "Configure Add-on"
+
+#: s3compat/osf_addon/templates/s3compat_user_settings.mako:24
+msgid "Secret Key"
+msgstr "Secret Key"
+
+#: s3compat/osf_addon/templates/s3compat_user_settings.mako:32
+msgid "Apply"
+msgstr "Apply"
+
+#: s3compat/osf_addon/templates/s3compat_user_settings.mako:36
+msgid "Clear"
+msgstr "Clear"
+
+#: s3compat/osf_addon/templates/rdm_custom_storage_location/providers/s3compat_modal.html:9
+msgid "Connect a S3 Compatible Storage Account"
+msgstr "Connect a S3 Compatible Storage Account"
+
+#: s3compat/osf_addon/templates/rdm_custom_storage_location/providers/s3compat_modal.html:17
+msgid "Endpoint URL"
+msgstr "Endpoint URL"
+
+#: s3compat/osf_addon/templates/rdm_custom_storage_location/providers/s3compat_modal.html:33
+msgid "Enable Server Side Encryption"
+msgstr "Enable Server Side Encryption"
+
+#: s3compat/osf_addon/templates/rdm_custom_storage_location/providers/s3compat_modal.html:37
+msgid "Yes@institutional_storage"
+msgstr "Yes"
+
+#: s3compat/osf_addon/templates/rdm_custom_storage_location/providers/s3compat_modal.html:47
+msgid "Connect"
+msgstr "Connect"
