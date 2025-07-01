@@ -1,0 +1,28 @@
+# Include documentation files
+include README.md
+include LICENSE
+include ADDON_ARCHITECTURE.md
+
+# Include requirements and configuration files
+include requirements.txt
+include babel.cfg
+include pyproject.toml
+
+# Include locale files
+recursive-include s3compat/locale *.po *.pot *.mo
+
+# Include static files (JavaScript, CSS, JSON, images)
+recursive-include s3compat/osf_addon/static *.js *.css *.json *.png *.jpg *.gif *.svg
+
+# Include template files
+recursive-include s3compat/osf_addon/templates *.mako *.html
+
+# Include test data if any
+recursive-include tests *.py *.json
+
+# Exclude unwanted files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude *~
+global-exclude .DS_Store
+global-exclude __pycache__
