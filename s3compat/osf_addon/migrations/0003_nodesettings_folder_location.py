@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('addons_s3compat', '0002_auto_20180301_0356'),
+        ('s3compat_osf_addon', '0002_auto_20180301_0356'),
     ]
 
     operations = [

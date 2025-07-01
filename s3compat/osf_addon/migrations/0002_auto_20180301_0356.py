@@ -10,7 +10,7 @@ import django_extensions.db.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('addons_s3compat', '0001_initial'),
+        ('s3compat_osf_addon', '0001_initial'),
     ]
 
     operations = [

@@ -9,7 +9,7 @@ import osf.utils.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('addons_s3compat', '0003_nodesettings_folder_location'),
+        ('s3compat_osf_addon', '0003_nodesettings_folder_location'),
     ]
 
     operations = [
