@@ -1,6 +1,6 @@
 from framework.routing import Rule, json_renderer
 
-from addons.s3compat import views
+from . import views
 
 
 api_routes = {

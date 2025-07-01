@@ -2,10 +2,10 @@
 from nose.tools import (assert_equals, assert_true, assert_false)
 
 from addons.base.tests.base import OAuthAddonTestCaseMixin, AddonTestCase
-from addons.s3compat.tests.factories import S3CompatAccountFactory
-from addons.s3compat.provider import S3CompatProvider
-from addons.s3compat.serializer import S3CompatSerializer
-from addons.s3compat import utils
+from .factories import S3CompatAccountFactory
+from ..provider import S3CompatProvider
+from ..serializer import S3CompatSerializer
+from .. import utils
 
 class S3CompatAddonTestCase(OAuthAddonTestCaseMixin, AddonTestCase):
 

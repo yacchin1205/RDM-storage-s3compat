@@ -14,8 +14,8 @@ from addons.base.tests.models import (
     OAuthAddonNodeSettingsTestSuiteMixin,
     OAuthAddonUserSettingTestSuiteMixin
 )
-from addons.s3compat.models import NodeSettings
-from addons.s3compat.tests.factories import (
+from ..models import NodeSettings
+from .factories import (
     S3CompatUserSettingsFactory,
     S3CompatNodeSettingsFactory,
     S3CompatAccountFactory
@@ -82,9 +82,9 @@ class TestNodeSettings(OAuthAddonNodeSettingsTestSuiteMixin, unittest.TestCase):
                     'secret_key': self.node_settings.external_account.oauth_secret}
         assert_equal(credentials, expected)
 
-    @mock.patch('addons.s3compat.models.bucket_exists')
-    @mock.patch('addons.s3compat.models.get_bucket_location_or_error')
-    @mock.patch('addons.s3compat.models.find_service_by_host')
+    @mock.patch('s3compat.osf_addon.models.bucket_exists')
+    @mock.patch('s3compat.osf_addon.models.get_bucket_location_or_error')
+    @mock.patch('s3compat.osf_addon.models.find_service_by_host')
     def test_serialize_credentials_undefined_location(self, mock_service, mock_location, mock_exists):
         mock_exists.return_value = True
         mock_location.return_value = 'dummy-1'
@@ -103,9 +103,9 @@ class TestNodeSettings(OAuthAddonNodeSettingsTestSuiteMixin, unittest.TestCase):
                     'secret_key': self.node_settings.external_account.oauth_secret}
         assert_equal(credentials, expected)
 
-    @mock.patch('addons.s3compat.models.bucket_exists')
-    @mock.patch('addons.s3compat.models.get_bucket_location_or_error')
-    @mock.patch('addons.s3compat.models.find_service_by_host')
+    @mock.patch('s3compat.osf_addon.models.bucket_exists')
+    @mock.patch('s3compat.osf_addon.models.get_bucket_location_or_error')
+    @mock.patch('s3compat.osf_addon.models.find_service_by_host')
     def test_serialize_credentials_defined_location(self, mock_service, mock_location, mock_exists):
         mock_exists.return_value = True
         mock_location.return_value = 'dummy-2'
@@ -138,9 +138,9 @@ class TestNodeSettings(OAuthAddonNodeSettingsTestSuiteMixin, unittest.TestCase):
                     'secret_key': self.node_settings.external_account.oauth_secret}
         assert_equal(credentials, expected)
 
-    @mock.patch('addons.s3compat.models.bucket_exists')
-    @mock.patch('addons.s3compat.models.get_bucket_location_or_error')
-    @mock.patch('addons.s3compat.models.find_service_by_host')
+    @mock.patch('s3compat.osf_addon.models.bucket_exists')
+    @mock.patch('s3compat.osf_addon.models.get_bucket_location_or_error')
+    @mock.patch('s3compat.osf_addon.models.find_service_by_host')
     def test_set_folder(self, mock_service, mock_location, mock_exists):
         mock_exists.return_value = True
         mock_location.return_value = ''
@@ -156,9 +156,9 @@ class TestNodeSettings(OAuthAddonNodeSettingsTestSuiteMixin, unittest.TestCase):
         last_log = self.node.logs.latest()
         assert_equal(last_log.action, '{0}_bucket_linked'.format(self.short_name))
 
-    @mock.patch('addons.s3compat.models.bucket_exists')
-    @mock.patch('addons.s3compat.models.get_bucket_location_or_error')
-    @mock.patch('addons.s3compat.models.find_service_by_host')
+    @mock.patch('s3compat.osf_addon.models.bucket_exists')
+    @mock.patch('s3compat.osf_addon.models.get_bucket_location_or_error')
+    @mock.patch('s3compat.osf_addon.models.find_service_by_host')
     def test_set_folder_undefined_location(self, mock_service, mock_location, mock_exists):
         mock_exists.return_value = True
         mock_location.return_value = 'dummy-1'
@@ -174,9 +174,9 @@ class TestNodeSettings(OAuthAddonNodeSettingsTestSuiteMixin, unittest.TestCase):
         last_log = self.node.logs.latest()
         assert_equal(last_log.action, '{0}_bucket_linked'.format(self.short_name))
 
-    @mock.patch('addons.s3compat.models.bucket_exists')
-    @mock.patch('addons.s3compat.models.get_bucket_location_or_error')
-    @mock.patch('addons.s3compat.models.find_service_by_host')
+    @mock.patch('s3compat.osf_addon.models.bucket_exists')
+    @mock.patch('s3compat.osf_addon.models.get_bucket_location_or_error')
+    @mock.patch('s3compat.osf_addon.models.find_service_by_host')
     def test_set_folder_defined_location(self, mock_service, mock_location, mock_exists):
         mock_exists.return_value = True
         mock_location.return_value = 'dummy-2'
@@ -195,9 +195,9 @@ class TestNodeSettings(OAuthAddonNodeSettingsTestSuiteMixin, unittest.TestCase):
         last_log = self.node.logs.latest()
         assert_equal(last_log.action, '{0}_bucket_linked'.format(self.short_name))
 
-    @mock.patch('addons.s3compat.models.bucket_exists')
-    @mock.patch('addons.s3compat.models.get_bucket_location_or_error')
-    @mock.patch('addons.s3compat.models.find_service_by_host')
+    @mock.patch('s3compat.osf_addon.models.bucket_exists')
+    @mock.patch('s3compat.osf_addon.models.get_bucket_location_or_error')
+    @mock.patch('s3compat.osf_addon.models.find_service_by_host')
     def test_set_folder_encrypt_uploads_with_encryption_setting(self, mock_service, mock_location, mock_exists):
         mock_exists.return_value = True
         mock_location.return_value = 'dummy-3'
@@ -214,9 +214,9 @@ class TestNodeSettings(OAuthAddonNodeSettingsTestSuiteMixin, unittest.TestCase):
         last_log = self.node.logs.latest()
         assert_equal(last_log.action, '{0}_bucket_linked'.format(self.short_name))
 
-    @mock.patch('addons.s3compat.models.bucket_exists')
-    @mock.patch('addons.s3compat.models.get_bucket_location_or_error')
-    @mock.patch('addons.s3compat.models.find_service_by_host')
+    @mock.patch('s3compat.osf_addon.models.bucket_exists')
+    @mock.patch('s3compat.osf_addon.models.get_bucket_location_or_error')
+    @mock.patch('s3compat.osf_addon.models.find_service_by_host')
     def test_set_folder_encrypt_uploads_without_encryption_setting(self, mock_service, mock_location, mock_exists):
         mock_exists.return_value = True
         mock_location.return_value = 'dummy-3'

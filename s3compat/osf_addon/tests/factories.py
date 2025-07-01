@@ -4,7 +4,7 @@ import factory
 from factory.django import DjangoModelFactory
 from osf_tests.factories import UserFactory, ProjectFactory, ExternalAccountFactory
 
-from addons.s3compat.models import (
+from ..models import (
     UserSettings,
     NodeSettings
 )

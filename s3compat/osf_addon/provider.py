@@ -1,4 +1,4 @@
-from addons.s3compat.serializer import S3CompatSerializer
+from .serializer import S3CompatSerializer
 
 class S3CompatProvider(object):
     """An alternative to `ExternalProvider` not tied to OAuth"""

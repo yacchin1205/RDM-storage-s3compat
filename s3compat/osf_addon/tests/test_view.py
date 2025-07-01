@@ -14,9 +14,9 @@ from osf_tests.factories import ProjectFactory, AuthUserFactory, DraftRegistrati
 from addons.base.tests.views import (
     OAuthAddonConfigViewsTestCaseMixin
 )
-from addons.s3compat.tests.utils import S3CompatAddonTestCase
-from addons.s3compat.utils import validate_bucket_name
-import addons.s3compat.settings as s3compat_settings
+from .utils import S3CompatAddonTestCase
+from ..utils import validate_bucket_name
+from .. import settings as s3compat_settings
 from website.util import api_url_for
 from admin.rdm_addons.utils import get_rdm_addon_option
 
@@ -24,13 +24,13 @@ pytestmark = pytest.mark.django_db
 
 class TestS3CompatViews(S3CompatAddonTestCase, OAuthAddonConfigViewsTestCaseMixin, OsfTestCase):
     def setUp(self):
-        self.mock_can_list = mock.patch('addons.s3compat.views.utils.can_list')
+        self.mock_can_list = mock.patch('s3compat.osf_addon.views.utils.can_list')
         self.mock_can_list.return_value = True
         self.mock_can_list.start()
-        self.mock_uid = mock.patch('addons.s3compat.views.utils.get_user_info')
+        self.mock_uid = mock.patch('s3compat.osf_addon.views.utils.get_user_info')
         self.mock_uid.return_value = {'id': '1234567890', 'display_name': 's3compat.user'}
         self.mock_uid.start()
-        self.mock_exists = mock.patch('addons.s3compat.views.utils.bucket_exists')
+        self.mock_exists = mock.patch('s3compat.osf_addon.views.utils.bucket_exists')
         self.mock_exists.return_value = True
         self.mock_exists.start()
         super(TestS3CompatViews, self).setUp()
@@ -142,7 +142,7 @@ class TestS3CompatViews(S3CompatAddonTestCase, OAuthAddonConfigViewsTestCaseMixi
 
         assert_equal(res.status_code, http_status.HTTP_400_BAD_REQUEST)
 
-    @mock.patch('addons.s3compat.views.utils.can_list', return_value=False)
+    @mock.patch('s3compat.osf_addon.views.utils.can_list', return_value=False)
     def test_user_settings_cant_list(self, mock_can_list):
         url = api_url_for('s3compat_add_user_account')
         rv = self.app.post_json(url, {
@@ -187,14 +187,14 @@ class TestS3CompatViews(S3CompatAddonTestCase, OAuthAddonConfigViewsTestCaseMixi
 
     ## Overrides ##
 
-    @mock.patch('addons.s3compat.models.get_bucket_names')
+    @mock.patch('s3compat.osf_addon.models.get_bucket_names')
     def test_folder_list(self, mock_names):
         mock_names.return_value = ['bucket1', 'bucket2']
         super(TestS3CompatViews, self).test_folder_list()
 
-    @mock.patch('addons.s3compat.models.bucket_exists')
-    @mock.patch('addons.s3compat.models.get_bucket_location_or_error')
-    @mock.patch('addons.s3compat.models.find_service_by_host')
+    @mock.patch('s3compat.osf_addon.models.bucket_exists')
+    @mock.patch('s3compat.osf_addon.models.get_bucket_location_or_error')
+    @mock.patch('s3compat.osf_addon.models.find_service_by_host')
     def test_set_config(self, mock_service, mock_location, mock_exists):
         mock_exists.return_value = True
         mock_location.return_value = ''
@@ -273,8 +273,8 @@ class TestCreateBucket(S3CompatAddonTestCase, OsfTestCase):
         assert_true(validate_bucket_name('a--------a'))
         assert_true(validate_bucket_name('a' * 63))
 
-    @mock.patch('addons.s3compat.views.utils.create_bucket')
-    @mock.patch('addons.s3compat.views.utils.get_bucket_names')
+    @mock.patch('s3compat.osf_addon.views.utils.create_bucket')
+    @mock.patch('s3compat.osf_addon.views.utils.get_bucket_names')
     def test_create_bucket_pass(self, mock_names, mock_make):
         mock_make.return_value = True
         mock_names.return_value = [
@@ -294,7 +294,7 @@ class TestCreateBucket(S3CompatAddonTestCase, OsfTestCase):
         assert_equal(ret.status_int, http_status.HTTP_200_OK)
         assert_equal(ret.json, {})
 
-    @mock.patch('addons.s3compat.views.utils.create_bucket')
+    @mock.patch('s3compat.osf_addon.views.utils.create_bucket')
     def test_create_bucket_fail(self, mock_make):
         error = S3ResponseError(418, 'because Im a test')
         error.message = 'This should work'

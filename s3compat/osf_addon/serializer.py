@@ -1,6 +1,6 @@
 from website.util import web_url_for
 from addons.base.serializer import StorageAddonSerializer
-from addons.s3compat import utils
+from . import utils
 
 class S3CompatSerializer(StorageAddonSerializer):
     addon_short_name = 's3compat'

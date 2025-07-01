@@ -8,9 +8,9 @@ from framework.exceptions import HTTPError
 from framework.auth.decorators import must_be_logged_in
 
 from addons.base import generic_views
-from addons.s3compat import utils
-from addons.s3compat.serializer import S3CompatSerializer
-import addons.s3compat.settings as settings
+from . import utils
+from .serializer import S3CompatSerializer
+from . import settings
 from osf.models import ExternalAccount
 from website.project.decorators import (
     must_have_addon, must_have_permission,

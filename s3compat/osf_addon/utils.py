@@ -4,7 +4,7 @@ from rest_framework import status as http_status
 from boto import exception
 from boto.s3.connection import S3Connection, OrdinaryCallingFormat, NoHostProvided
 from boto.s3.bucket import Bucket
-import addons.s3compat.settings as settings
+from . import settings
 
 from framework.exceptions import HTTPError
 from addons.base.exceptions import InvalidAuthError, InvalidFolderError

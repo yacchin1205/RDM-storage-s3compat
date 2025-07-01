@@ -6,13 +6,13 @@ from django.db import models
 from framework.auth.core import Auth
 from osf.models.files import File, Folder, BaseFileNode
 from addons.base import exceptions
-from addons.s3compat.provider import S3CompatProvider
-from addons.s3compat.serializer import S3CompatSerializer
-from addons.s3compat.settings import ENCRYPT_UPLOADS_DEFAULT
-from addons.s3compat.utils import (bucket_exists,
-                                     get_bucket_location_or_error,
-                                     get_bucket_names,
-                                     find_service_by_host)
+from .provider import S3CompatProvider
+from .serializer import S3CompatSerializer
+from .settings import ENCRYPT_UPLOADS_DEFAULT
+from .utils import (bucket_exists,
+                    get_bucket_location_or_error,
+                    get_bucket_names,
+                    find_service_by_host)
 
 class S3CompatFileNode(BaseFileNode):
     _provider = 's3compat'
