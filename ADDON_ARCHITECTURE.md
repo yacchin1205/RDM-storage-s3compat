@@ -20,6 +20,11 @@ This document outlines the architectural approach for extracting storage addons 
 - **Functionality**: File CRUD operations, storage API communication
 - **Dependencies**: Tightly coupled to Waterbutler core
 
+### RDM-gravyvalet
+
+*To be considered*
+
+
 ## Target Modular Architecture
 
 ### Independent Storage Packages
