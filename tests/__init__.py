@@ -1,0 +1,1 @@
+"""Test suite for S3 Compatible Storage package"""

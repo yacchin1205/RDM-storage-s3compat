@@ -1,0 +1,12 @@
+# Core dependencies
+boto==2.38.0
+xmltodict>=0.12.0
+
+# Optional dependencies (installed based on use case)
+# OSF Integration:
+# Django>=3.2
+# Flask>=1.0
+
+# Waterbutler Integration:
+# aiohttp>=3.8
+# tornado>=6.0
