@@ -1,4 +1,4 @@
-# RDM Storage Addon Architecture
+# OSF-GakuNin RDM Storage Addon Architecture
 
 ## Overview
 
@@ -9,14 +9,14 @@ This document outlines the architectural approach for extracting storage addons 
 ### RDM-osf.io Storage Addons
 - **Location**: `addons/{storage_type}/`
 - **Type**: Django-based OSF addons
-- **Examples**: `s3compat/`, `s3compatb3/`, `s3compatinstitutions/`, `nextcloud/`, `swift/`
+- **Examples**: `s3compat/`, `s3compatb3/`, `swift/`
 - **Functionality**: Web UI, authentication, settings management
 - **Dependencies**: Tightly coupled to OSF framework
 
 ### RDM-waterbutler Storage Providers
 - **Location**: `waterbutler/providers/{storage_type}/`
 - **Type**: Async file operation providers
-- **Examples**: `s3compat/`, `s3compatb3/`, `nextcloudinstitutions/`, `swift/`
+- **Examples**: `s3compat/`, `s3compatb3/`, `swift/`
 - **Functionality**: File CRUD operations, storage API communication
 - **Dependencies**: Tightly coupled to Waterbutler core
 
@@ -32,7 +32,7 @@ Each storage type becomes an independent Python package with a consistent struct
 ├── README.md
 ├── {storage_name}/               # Top-level module (e.g., s3compat/)
 │   ├── __init__.py
-│   ├── osf_addon/               # OSF Integration Components
+│   ├── osf_addon/               # OSF (GakuNin RDM) Integration Components
 │   │   ├── __init__.py
 │   │   ├── apps.py
 │   │   ├── models.py
@@ -148,8 +148,24 @@ No special discovery mechanism is required - standard Django app loading handles
 ### Waterbutler Provider Discovery
 Waterbutler uses its existing provider discovery mechanism through standard `waterbutler.providers` entry points. No additional loader code is required in Waterbutler - providers are automatically discovered when packages are installed with the correct entry points.
 
+```python
+# setup.py for each storage package
+setup(
+    name='{storage_name}',
+    packages=['{storage_name}'],
+    entry_points={
+        'waterbutler.providers': [
+            '{storage_name} = {storage_name}.waterbutler_provider:Provider',
+        ],
+        'rdm.admin_integrations': [
+            '{storage_name} = {storage_name}.osf_addon.admin_integration:get_admin_integration_info',
+        ],
+    }
+)
+```
+
 ### Admin Integration Plugin System
-OSF admin modules can integrate with storage addons through a plugin system that allows dynamic discovery and loading of admin-specific functionality.
+GakuNin RDM admin modules can integrate with storage addons through a plugin system that allows dynamic discovery and loading of admin-specific functionality.
 
 ```python
 # Storage package provides admin integration
@@ -193,34 +209,6 @@ def get_test_connection_function(provider_name):
     return integration_info.get('test_connection_func')
 ```
 
-## Package Configuration Standards
-
-### Entry Points Definition
-```python
-# setup.py for each storage package
-setup(
-    name='{storage_name}',
-    packages=['{storage_name}'],
-    entry_points={
-        'waterbutler.providers': [
-            '{storage_name} = {storage_name}.waterbutler_provider:Provider',
-        ],
-        'rdm.admin_integrations': [
-            '{storage_name} = {storage_name}.osf_addon.admin_integration:get_admin_integration_info',
-        ],
-    }
-)
-```
-
-### Version Compatibility
-```python
-# Each package specifies compatible versions
-COMPATIBILITY = {
-    'rdm_osf': '>=4.0.0,<5.0.0',
-    'rdm_waterbutler': '>=1.18.0,<2.0.0'
-}
-```
-
 ## Development Workflow
 
 ### Package Development
@@ -245,55 +233,6 @@ class StorageIntegrationTest:
 - **Compatibility Matrix**: Clear documentation of version compatibility
 - **Staged Rollout**: Ability to update storage packages independently
 
-## Benefits of Modular Architecture
-
-### For Development
-- **Focused Development**: Teams can work on specific storage integrations
-- **Faster Iteration**: Changes don't require full RDM rebuild/redeploy
-- **Easier Testing**: Isolated testing of storage-specific functionality
-
-### For Deployment
-- **Selective Installation**: Install only needed storage types
-- **Independent Updates**: Update storage packages without touching core RDM
-- **Resource Optimization**: Reduced memory footprint for unused storage types
-
-### For Maintenance
-- **Clear Ownership**: Each storage package has dedicated maintainers
-- **Reduced Coupling**: Changes in one storage type don't affect others
-- **Simplified Debugging**: Issues isolated to specific packages
-
-### For Admin Integration
-- **Plugin Architecture**: Admin functions dynamically discovered through entry points
-- **Standardized Interface**: Consistent API for all storage admin operations
-- **Graceful Degradation**: Admin functions work even if external packages unavailable
-- **Extensible**: New admin operations easily added through plugin interface
-
-## Storage Type Examples
-
-### High-Priority Candidates for Extraction
-1. **s3compat**: S3-compatible storage services (16 providers)
-2. **nextcloud/nextcloudinstitutions**: Nextcloud integration
-3. **swift**: OpenStack Swift integration
-4. **azureblobstorage**: Azure Blob Storage integration
-
-### Extraction Complexity Assessment
-- **Low Complexity**: Self-contained providers (s3compat, swift)
-- **Medium Complexity**: Providers with institutional variants (nextcloud)
-- **High Complexity**: Providers with deep OSF integration (osfstorage)
-
-## Implementation Strategy
-
-### Phase-Based Approach
-1. **Proof of Concept**: Extract one storage type (s3compat) to validate architecture
-2. **Template Creation**: Develop reusable templates and tooling
-3. **Systematic Extraction**: Apply pattern to remaining storage types
-4. **Legacy Cleanup**: Remove extracted code from main repositories
-
-### Development Tools
-- **Package Templates**: Cookiecutter templates for new storage packages
-- **Migration Scripts**: Automated tools for extracting existing code
-- **Integration Testing**: Shared test suites for validating contracts
-- **Admin Plugin Framework**: Standardized admin integration patterns
 
 ## Admin Plugin Standards
 
@@ -333,50 +272,7 @@ def test_connection(endpoint_url, access_key, secret_key, bucket_name=None):
 4. **Execution**: Standardized interface ensures consistent behavior
 5. **Fallback**: Graceful degradation when plugins unavailable
 
-### Error Handling Standards
-- **Plugin Not Found**: Clear error message indicating package installation needed
-- **Function Errors**: Comprehensive error details for debugging
-- **Graceful Degradation**: Admin functions continue working without specific plugins
-- **Logging**: Appropriate log levels for plugin discovery and execution
 
-## Quality Assurance
-
-### Testing Standards
-- **Unit Tests**: Each component tested independently
-- **Integration Tests**: OSF ↔ Waterbutler communication verified
-- **Contract Tests**: Interface compliance validated
-
-### Documentation Requirements
-- **API Documentation**: Standardized format for all storage packages
-- **Configuration Guide**: Clear setup and configuration instructions
-- **Troubleshooting**: Common issues and solutions
-
-### Code Quality
-- **Consistent Patterns**: Shared architectural patterns across packages
-- **Error Handling**: Standardized error types and handling
-- **Logging**: Consistent logging format and levels
-
-## Future Considerations
-
-### Extensibility
-- **Custom Storage Types**: Framework for developing new storage integrations
-- **Storage Aggregation**: Ability to compose multiple storage backends
-- **Storage Policies**: Configurable rules for storage selection and behavior
-
-### Performance
-- **Lazy Loading**: Load storage packages only when needed
-- **Caching**: Shared caching strategies across storage types
-- **Connection Pooling**: Efficient resource management
-
-### Security
-- **Credential Management**: Secure handling of storage credentials
-- **Access Control**: Fine-grained permissions for storage operations
-- **Audit Logging**: Comprehensive audit trails for all storage activities
-
----
-
-**Document Version**: 1.1  
-**Last Updated**: 2025-01-07  
 ## Template Plugin System
 
 The template plugin system allows storage addons to provide their own Django templates that are dynamically loaded by the admin interface. This separates template code from the main admin codebase.
@@ -469,277 +365,3 @@ The system gracefully falls back to built-in templates if plugin templates are u
 - **File**: `admin/rdm_custom_storage_location/templatetags/storage_tags.py`
 - **Tags**: `{% include_storage_modal %}`, `{% get_storage_modal_content %}`
 - **Purpose**: Django template tags for easy plugin template inclusion
-
-### Benefits
-
-- **Separation of Concerns**: Templates stay with their respective storage addons
-- **Independent Updates**: Storage addons can update templates without admin changes
-- **Backward Compatibility**: Existing templates continue to work as fallbacks
-- **Plugin Architecture**: Easy to add new storage types following the same pattern
-- **Dynamic Loading**: Templates are discovered and loaded at runtime
-- **Error Handling**: Graceful fallback when plugin templates are unavailable
-
-### Migration from Built-in Templates
-
-1. **Move Template**: Copy template from `admin/templates/` to addon package
-2. **Update Template Functions**: Implement `get_template_path()` and `get_template_content()`
-3. **Update Admin Integration**: Add template metadata to integration info
-4. **Test Plugin Loading**: Verify template loads correctly via plugin system
-5. **Remove Original**: Delete original template from admin/templates/
-6. **Update Template References**: Use custom template tags instead of direct includes
-
-**Architecture Status**: Implementation Complete
-
-## S3Compat Migration Implementation Summary
-
-This section documents the complete implementation of the s3compat addon extraction, serving as a reference for future storage addon migrations.
-
-### Migration Overview
-
-The s3compat addon has been successfully extracted from RDM-osf.io and RDM-waterbutler into an independent RDM-storage-s3compat package. This migration serves as the proof-of-concept implementation for the modular storage architecture.
-
-### Implementation Timeline
-
-**Session 1: Architecture Design and Basic Migration**
-- Analyzed existing s3compat codebase in both RDM-osf.io and RDM-waterbutler
-- Designed modular architecture with plugin systems
-- Created RDM-storage-s3compat package structure
-- Migrated OSF addon and Waterbutler provider code
-- Implemented basic plugin discovery systems
-
-**Session 2: Translation Resource Migration**
-- Identified translation file references to deleted s3compat templates
-- Implemented complete translation resource migration strategy
-- Preserved translation continuity while enabling independent operation
-
-### Completed Components
-
-#### 1. Package Structure
-```
-RDM-storage-s3compat/
-├── setup.py                           # Package configuration with entry points
-├── pyproject.toml                     # Build system and tool configuration
-├── babel.cfg                          # Internationalization configuration  
-├── README.md                          # Package documentation
-├── ADDON_ARCHITECTURE.md              # Architecture documentation
-├── s3compat/                          # Main package module
-│   ├── __init__.py                    # Version and package info
-│   ├── osf_addon/                     # OSF integration components
-│   │   ├── __init__.py
-│   │   ├── apps.py                    # Django app configuration
-│   │   ├── models.py                  # Data models
-│   │   ├── views.py                   # View controllers
-│   │   ├── serializer.py              # API serialization
-│   │   ├── utils.py                   # Utility functions
-│   │   ├── provider.py                # Provider information
-│   │   ├── admin_integration.py       # Admin plugin integration
-│   │   ├── static/                    # Static assets
-│   │   └── templates/                 # UI templates
-│   │       ├── s3compat_credentials_modal.mako
-│   │       ├── s3compat_node_settings.mako
-│   │       ├── s3compat_user_settings.mako
-│   │       └── rdm_custom_storage_location/providers/
-│   │           └── s3compat_modal.html # Admin modal template
-│   ├── waterbutler_provider/          # Waterbutler integration
-│   │   ├── __init__.py
-│   │   ├── provider.py                # Main provider class
-│   │   ├── metadata.py                # Metadata classes
-│   │   └── settings.py                # Provider settings
-│   └── locale/                        # Internationalization
-│       ├── messages.pot               # Translation template
-│       ├── ja/LC_MESSAGES/messages.po # Japanese translations
-│       └── en/LC_MESSAGES/messages.po # English translations
-└── tests/                             # Test suite
-    ├── osf_integration/               # OSF-specific tests
-    └── waterbutler_integration/       # Waterbutler provider tests
-        └── test_provider.py           # Comprehensive provider tests
-```
-
-#### 2. Plugin System Implementation
-
-**Admin Integration Plugin:**
-```python
-# s3compat/osf_addon/admin_integration.py
-def test_s3compat_connection(endpoint_url, access_key, secret_key, bucket_name=None):
-    """Test connection to S3 compatible storage"""
-    # Implementation for connection testing
-    return {
-        'success': bool,
-        'message': str,
-        'user_info': dict,
-        'can_list': bool,
-        'bucket_exists': bool
-    }
-
-def get_admin_integration_info():
-    """Plugin discovery information"""
-    return {
-        'provider_name': 's3compat',
-        'display_name': 'S3 Compatible Storage',
-        'test_connection_func': test_s3compat_connection,
-        'templates': {
-            'modal': {
-                'name': 's3compat_modal.html',
-                'path': 'rdm_custom_storage_location/providers/s3compat_modal.html',
-            }
-        }
-    }
-```
-
-**Entry Points Configuration:**
-```python
-# setup.py
-entry_points={
-    'waterbutler.providers': [
-        's3compat = s3compat.waterbutler_provider:S3CompatProvider',
-    ],
-    'rdm.admin_integrations': [
-        's3compat = s3compat.osf_addon.admin_integration:get_admin_integration_info',
-    ],
-}
-```
-
-#### 3. Translation System
-
-**Babel Configuration:**
-```ini
-# babel.cfg
-[python: **.py]
-[mako: s3compat/osf_addon/templates/**.mako]
-[django: s3compat/osf_addon/templates/rdm_custom_storage_location/providers/**.html]
-encoding = utf-8
-```
-
-**Complete Translation Coverage:**
-- OSF addon templates: 15 translation strings (s3compat_*.mako files)
-- Admin templates: 5 translation strings (s3compat_modal.html)
-- Japanese and English translations provided
-- Template reference updates in RDM-osf.io translation files
-
-#### 4. Test Migration
-
-**Comprehensive Test Suite:**
-- Moved from RDM-waterbutler/tests/providers/s3compat/
-- Restored complete test suite from commit a8a8e635
-- Tests include: provider construction, path validation, CRUD operations
-- Integration tests with aiohttpretty mocking
-- All tests pass independently in s3compat package
-
-#### 5. Integration Changes
-
-**RDM-osf.io Changes:**
-- Removed original s3compat addon directory
-- Updated admin plugin system to discover s3compat via entry points
-- Removed s3compat references while preserving shared translation strings
-- Updated translation file references: `addons/s3compat/templates/` → `s3compat/osf_addon/templates/`
-- Admin translation references: `admin/templates/rdm_custom_storage_location/providers/s3compat_modal.html` → `s3compat/osf_addon/templates/rdm_custom_storage_location/providers/s3compat_modal.html`
-
-**RDM-waterbutler Changes:**
-- Removed original s3compat provider directory  
-- Removed s3compat entry point from setup.py
-- s3compat provider now loaded from external package
-
-### Key Implementation Decisions
-
-#### 1. Translation Resource Strategy
-**Challenge**: Preserve translation strings while enabling independent operation
-**Solution**: 
-- Migrate all s3compat translation strings to s3compat package
-- Update file path references in RDM-osf.io translation files
-- Maintain backward compatibility for shared strings
-
-#### 2. Test Migration Approach  
-**Challenge**: Maintain comprehensive test coverage in independent package
-**Solution**:
-- Move entire test suite from waterbutler to s3compat package
-- Restore full test coverage from deleted commit
-- Ensure tests run independently without waterbutler dependencies
-
-#### 3. Admin Integration Plugin Design
-**Challenge**: Enable admin functionality without tight coupling
-**Solution**:
-- Implement plugin discovery via entry points
-- Standardize admin integration interface
-- Support both connection testing and template management
-
-#### 4. Template Plugin Architecture
-**Challenge**: Separate admin templates while maintaining functionality
-**Solution**:
-- Custom Django template loader for plugin templates
-- Template tags for dynamic plugin template inclusion
-- Graceful fallback to built-in templates
-
-### Migration Verification
-
-#### Functional Testing
-- ✅ S3compat package installs independently
-- ✅ OSF recognizes s3compat addon via INSTALLED_APPS
-- ✅ Waterbutler discovers s3compat provider via entry points
-- ✅ Admin plugin system finds s3compat integration
-- ✅ Templates load correctly from s3compat package
-- ✅ Translations work for both OSF and admin interfaces
-- ✅ Complete test suite passes independently
-
-#### Code Quality
-- ✅ No remaining s3compat references in RDM-osf.io
-- ✅ No remaining s3compat references in RDM-waterbutler  
-- ✅ Clean separation of concerns between packages
-- ✅ Standardized plugin interfaces implemented
-- ✅ Comprehensive documentation updated
-
-### Benefits Realized
-
-#### Development Benefits
-- **Independent Development**: s3compat can be developed separately
-- **Faster Testing**: Test only s3compat without full RDM environment
-- **Clear Ownership**: Dedicated maintainership for s3compat functionality
-- **Simplified Debugging**: Issues isolated to specific package
-
-#### Deployment Benefits  
-- **Selective Installation**: Install s3compat only when needed
-- **Independent Updates**: Update s3compat without touching RDM core
-- **Reduced Footprint**: Smaller memory usage when s3compat not installed
-- **Plugin Architecture**: Easy addition/removal of storage types
-
-#### Maintenance Benefits
-- **Focused Changes**: s3compat changes don't affect other storage types
-- **Version Control**: Independent versioning and release cycles
-- **Translation Management**: Self-contained translation resources
-- **Test Isolation**: s3compat tests don't interfere with other components
-
-### Lessons Learned
-
-#### 1. Translation Migration Complexity
-**Issue**: Initially attempted to simply remove translation references
-**Learning**: Translation strings must be preserved and migrated, not deleted
-**Resolution**: Comprehensive translation migration strategy with file path updates
-
-#### 2. Test Dependency Management
-**Issue**: Confusion about test dependencies between packages
-**Learning**: Tests should be completely self-contained in the extracted package
-**Resolution**: Full test migration with restoration from deleted commit
-
-#### 3. Plugin Interface Standardization
-**Issue**: Need for consistent interfaces across different integration points
-**Learning**: Standardized plugin interfaces are crucial for maintainability
-**Resolution**: Well-defined contracts for admin integration and template management
-
-#### 4. Incremental Migration Benefits
-**Issue**: Trying to extract everything at once would be overwhelming
-**Learning**: Step-by-step migration allows for validation and refinement
-**Resolution**: Successful proof-of-concept enables confident replication for other addons
-
-### Future Migration Template
-
-This s3compat migration provides a complete template for future storage addon extractions:
-
-1. **Package Structure**: Use established directory layout and naming conventions
-2. **Plugin System**: Implement standardized admin integration and template plugins
-3. **Translation Migration**: Follow comprehensive translation resource migration process
-4. **Test Migration**: Move complete test suites to maintain coverage
-5. **Documentation**: Update architecture documentation with implementation details
-6. **Verification**: Use established checklist for functional and quality verification
-
-The s3compat extraction demonstrates that the modular storage architecture is not only feasible but provides significant benefits for development, deployment, and maintenance of RDM storage integrations.
-
-**Migration Status**: ✅ Complete and Production Ready
