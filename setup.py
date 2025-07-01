@@ -42,8 +42,7 @@ setup(
     
     extras_require={
         'osf': [
-            'Django>=3.2',
-            'Flask>=1.0',
+            # Note: Django and Flask are provided by RDM-osf.io environment
             'Babel>=2.5.1',  # For i18n support
             'Mako>=1.0',     # For template support
         ],
