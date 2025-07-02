@@ -28,7 +28,7 @@ jobs:
         pip install Django==1.11.29
         pip install Mako==1.0.14
         pip install Babel==2.5.1
-        pip install -e .[osf]
+        pip install -e .[osf] --no-cache-dir
 
     - name: Test OSF addon functionality
       run: |
@@ -99,7 +99,7 @@ jobs:
         pip install aiohttp==3.6.2
         pip install tornado==6.0.3
         pip install boto==2.49.0
-        pip install -e .[waterbutler]
+        pip install -e .[waterbutler] --no-cache-dir
 
     - name: Test waterbutler provider functionality
       run: |

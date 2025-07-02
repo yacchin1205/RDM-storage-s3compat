@@ -52,18 +52,18 @@ setup(
             'tornado>=6.0',
         ],
         'dev': [
-            'pytest>=6.0',
-            'pytest-asyncio>=0.18',
+            'pytest>=6.0,<7.0',  # Python 3.6 compatible
+            'pytest-asyncio>=0.15,<0.17',  # Python 3.6 compatible
             'aiohttpretty>=0.1.1',  # For waterbutler integration tests
-            'pytest-cov>=2.10',
-            'flake8>=3.8',
-            'black>=21.0',
+            'pytest-cov>=2.10,<3.0',  # Python 3.6 compatible
+            'flake8>=3.8,<4.0',  # Python 3.6 compatible
+            'black>=21.0,<22.0; python_version>="3.7"',  # Skip black for Python 3.6
             'Babel>=2.5.1',  # For i18n development
         ],
         'test': [
-            'pytest>=6.0',
-            'pytest-asyncio>=0.18',
-            'pytest-cov>=2.10',
+            'pytest>=6.0,<7.0',  # Python 3.6 compatible
+            'pytest-asyncio>=0.15,<0.17',  # Python 3.6 compatible
+            'pytest-cov>=2.10,<3.0',  # Python 3.6 compatible
             'mock>=4.0',
         ],
     },
