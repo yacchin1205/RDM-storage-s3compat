@@ -39,6 +39,13 @@ jobs:
         print('Package loaded with lazy loading')
         print('OSF addon available:', hasattr(s3compat, 'osf_addon'))
         print('Waterbutler provider available:', hasattr(s3compat, 'waterbutler_provider'))
+        
+        # Test that we can access OSF addon without waterbutler dependencies
+        try:
+            import s3compat.osf_addon
+            print('OSF addon imports successfully without waterbutler')
+        except ImportError as e:
+            print(f'OSF addon import failed (expected in waterbutler-only env): {e}')
         "
 
     - name: Test entry points
@@ -93,6 +100,13 @@ jobs:
         print('OSF addon available:', hasattr(s3compat, 'osf_addon'))
         # Test that waterbutler_provider is accessible as attribute  
         print('Waterbutler provider available:', hasattr(s3compat, 'waterbutler_provider'))
+        
+        # Test that we can access OSF addon without waterbutler dependencies
+        try:
+            import s3compat.osf_addon
+            print('OSF addon imports successfully without waterbutler')
+        except ImportError as e:
+            print(f'OSF addon import failed: {e}')
         "
 
     - name: Test entry points

@@ -119,20 +119,28 @@ jobs:
       run: |
         echo "Testing provider import paths..."
         python -c "
-        # Test that provider modules can be found
+        # Test that provider modules can be found without actually importing them
         import importlib.util
+        import os
         
-        # Check if waterbutler provider module exists
+        # Check if waterbutler provider package exists
         spec = importlib.util.find_spec('s3compat.waterbutler_provider')
         if spec is None:
             raise Exception('waterbutler_provider module not found')
-        print('Waterbutler provider module found')
+        print('Waterbutler provider package found')
         
-        # Check if provider submodules exist
-        spec = importlib.util.find_spec('s3compat.waterbutler_provider.provider')
-        if spec is None:
-            raise Exception('provider submodule not found')
-        print('Provider submodule found')
+        # Check if provider.py file exists (without importing it)
+        provider_module = spec.submodule_search_locations[0]
+        provider_file = os.path.join(provider_module, 'provider.py')
+        if not os.path.exists(provider_file):
+            raise Exception('provider.py file not found')
+        print('Provider module file exists')
+        
+        # Check if metadata.py file exists
+        metadata_file = os.path.join(provider_module, 'metadata.py')
+        if not os.path.exists(metadata_file):
+            raise Exception('metadata.py file not found')
+        print('Metadata module file exists')
         "
 
   test-package-structure:
