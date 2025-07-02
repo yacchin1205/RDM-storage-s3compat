@@ -1,6 +1,8 @@
-# Core dependencies
-boto==2.38.0
-xmltodict>=0.12.0
+# Core dependencies  
+xmltodict>=0.9.0
+
+# Environment-specific dependencies:
+# - boto: provided by host environment (RDM-waterbutler or RDM-osf.io)
 
 # Optional dependencies (installed based on use case)
 # OSF Integration:

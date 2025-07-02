@@ -36,8 +36,8 @@ setup(
     zip_safe=False,
     
     install_requires=[
-        'boto==2.38.0',
-        'xmltodict>=0.12.0',
+        # Core dependencies with flexible versioning for compatibility
+        'xmltodict>=0.9.0',
     ],
     
     extras_require={
@@ -47,6 +47,7 @@ setup(
             'Mako>=1.0',     # For template support
         ],
         'waterbutler': [
+            # Note: boto is provided by RDM-waterbutler environment
             'aiohttp>=3.8',
             'tornado>=6.0',
         ],
