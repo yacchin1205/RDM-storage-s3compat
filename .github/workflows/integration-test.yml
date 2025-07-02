@@ -1,0 +1,252 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test-osf-integration:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.6'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gettext
+
+    - name: Install OSF-style dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # Install dependencies similar to RDM-osf.io environment
+        pip install Django==1.11.29
+        pip install Mako==1.0.14
+        pip install Babel==2.5.1
+        pip install -e .[osf]
+
+    - name: Test OSF addon functionality
+      run: |
+        echo "Testing OSF addon integration..."
+        python -c "
+        import os
+        os.environ['DJANGO_SETTINGS_MODULE'] = 'test_settings'
+        
+        # Create minimal Django settings for testing
+        from django.conf import settings
+        if not settings.configured:
+            settings.configure(
+                DEBUG=True,
+                INSTALLED_APPS=[
+                    'django.contrib.contenttypes',
+                    'django.contrib.auth',
+                    's3compat.osf_addon',
+                ],
+                SECRET_KEY='test',
+                DATABASES={
+                    'default': {
+                        'ENGINE': 'django.db.backends.sqlite3',
+                        'NAME': ':memory:',
+                    }
+                }
+            )
+        
+        import django
+        django.setup()
+        
+        # Test that the OSF addon can be imported and configured
+        from s3compat.osf_addon.apps import S3CompatConfig
+        print(f'OSF addon app config: {S3CompatConfig.name}')
+        print(f'OSF addon label: {S3CompatConfig.label}')
+        "
+
+    - name: Test admin integration entry point
+      run: |
+        echo "Testing admin integration..."
+        python -c "
+        import pkg_resources
+        entry_points = list(pkg_resources.iter_entry_points('rdm.admin_integrations', 's3compat'))
+        if entry_points:
+            print('Admin integration entry point found')
+            # Don't actually load since it requires full Django setup
+            print(f'Entry point module: {entry_points[0].module_name}')
+        else:
+            raise Exception('Admin integration entry point not found')
+        "
+
+  test-waterbutler-integration:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.6'
+
+    - name: Install waterbutler-style dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # Install dependencies similar to RDM-waterbutler environment
+        pip install aiohttp==3.6.2
+        pip install tornado==6.0.3
+        pip install boto==2.49.0
+        pip install -e .[waterbutler]
+
+    - name: Test waterbutler provider functionality
+      run: |
+        echo "Testing waterbutler provider integration..."
+        python -c "
+        # Test that waterbutler provider entry point exists
+        import pkg_resources
+        entry_points = list(pkg_resources.iter_entry_points('waterbutler.providers', 's3compat'))
+        if entry_points:
+            print('Waterbutler provider entry point found')
+            print(f'Entry point module: {entry_points[0].module_name}')
+        else:
+            raise Exception('Waterbutler provider entry point not found')
+        "
+
+    - name: Test provider imports (without loading)
+      run: |
+        echo "Testing provider import paths..."
+        python -c "
+        # Test that provider modules can be found
+        import importlib.util
+        
+        # Check if waterbutler provider module exists
+        spec = importlib.util.find_spec('s3compat.waterbutler_provider')
+        if spec is None:
+            raise Exception('waterbutler_provider module not found')
+        print('Waterbutler provider module found')
+        
+        # Check if provider submodules exist
+        spec = importlib.util.find_spec('s3compat.waterbutler_provider.provider')
+        if spec is None:
+            raise Exception('provider submodule not found')
+        print('Provider submodule found')
+        "
+
+  test-package-structure:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: Install package
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+
+    - name: Test package structure
+      run: |
+        echo "Testing package structure..."
+        python -c "
+        import s3compat
+        import os
+        
+        # Check main package
+        print(f'Package location: {s3compat.__file__}')
+        
+        # Check that subpackages exist
+        package_dir = os.path.dirname(s3compat.__file__)
+        
+        osf_addon_dir = os.path.join(package_dir, 'osf_addon')
+        if not os.path.exists(osf_addon_dir):
+            raise Exception('osf_addon directory not found')
+        print('OSF addon directory exists')
+        
+        waterbutler_dir = os.path.join(package_dir, 'waterbutler_provider')
+        if not os.path.exists(waterbutler_dir):
+            raise Exception('waterbutler_provider directory not found')
+        print('Waterbutler provider directory exists')
+        
+        # Check for static files
+        static_dir = os.path.join(osf_addon_dir, 'static')
+        if os.path.exists(static_dir):
+            print('Static files directory exists')
+            settings_json = os.path.join(static_dir, 'settings.json')
+            if os.path.exists(settings_json):
+                print('settings.json file exists')
+        "
+
+    - name: Test manifest inclusion
+      run: |
+        echo "Testing MANIFEST.in inclusion..."
+        python -c "
+        import pkg_resources
+        import os
+        
+        dist = pkg_resources.get_distribution('s3compat')
+        
+        # Check if static files are included in package
+        try:
+            resource = pkg_resources.resource_filename('s3compat.osf_addon', 'static/settings.json')
+            if os.path.exists(resource):
+                print('settings.json included in package')
+            else:
+                print('Warning: settings.json not found in package')
+        except:
+            print('Warning: Could not check for static files')
+        "
+
+  test-translations:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gettext
+
+    - name: Install package with Babel
+      run: |
+        python -m pip install --upgrade pip
+        pip install Babel>=2.5.1
+        pip install -e .
+
+    - name: Test translation files
+      run: |
+        echo "Testing translation functionality..."
+        python -c "
+        import os
+        import s3compat.osf_addon
+        
+        # Check for translation directories
+        addon_dir = os.path.dirname(s3compat.osf_addon.__file__)
+        locale_dir = os.path.join(addon_dir, 'locale')
+        
+        if os.path.exists(locale_dir):
+            print('Locale directory exists')
+            for item in os.listdir(locale_dir):
+                item_path = os.path.join(locale_dir, item)
+                if os.path.isdir(item_path):
+                    print(f'Translation directory: {item}')
+        else:
+            print('No locale directory found (this is okay)')
+        "

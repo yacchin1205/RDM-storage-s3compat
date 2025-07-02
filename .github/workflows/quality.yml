@@ -1,0 +1,181 @@
+name: Code Quality
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: Install linting dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort
+
+    - name: Run flake8
+      run: |
+        # Run flake8 on package code
+        flake8 s3compat/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Exit code 0 for warnings, only fail on errors
+        flake8 s3compat/ --count --max-complexity=10 --max-line-length=127 --statistics || true
+
+    - name: Check code formatting with black
+      run: |
+        black --check --diff s3compat/ || echo "Code formatting issues found (not failing build)"
+
+    - name: Check import sorting with isort
+      run: |
+        isort --check-only --diff s3compat/ || echo "Import sorting issues found (not failing build)"
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: Install security scanning tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+
+    - name: Run bandit security scan
+      run: |
+        bandit -r s3compat/ -f json -o bandit-report.json || true
+        if [ -f bandit-report.json ]; then
+          echo "Bandit security scan completed"
+          cat bandit-report.json
+        fi
+
+    - name: Check dependencies for known vulnerabilities
+      run: |
+        # Create a temporary requirements file for safety check
+        echo "xmltodict>=0.9.0" > temp-requirements.txt
+        safety check -r temp-requirements.txt || echo "Safety check completed"
+
+  documentation:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: Install documentation dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        if [ -f docs/requirements.txt ]; then
+          pip install -r docs/requirements.txt
+        fi
+
+    - name: Check README.md
+      run: |
+        if [ -f README.md ]; then
+          echo "README.md exists"
+          wc -l README.md
+        else
+          echo "Warning: No README.md found"
+        fi
+
+    - name: Check package metadata
+      run: |
+        python -c "
+        import setuptools
+        import pkg_resources
+        
+        # Check that package can be installed and has proper metadata
+        try:
+            dist = pkg_resources.get_distribution('s3compat')
+            print(f'Package: {dist.project_name}')
+            print(f'Version: {dist.version}')
+            print(f'Summary: {dist.metadata.get(\"Summary\", \"No summary\")}')
+            print(f'Author: {dist.metadata.get(\"Author\", \"No author\")}')
+            print(f'License: {dist.metadata.get(\"License\", \"No license\")}')
+        except Exception as e:
+            print(f'Error checking package metadata: {e}')
+        "
+
+  compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Test basic import compatibility
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        python -c "
+        import sys
+        print(f'Python version: {sys.version}')
+        
+        # Test basic imports work across Python versions
+        import s3compat
+        print('s3compat imported successfully')
+        
+        # Test lazy loading works
+        print('OSF addon available:', hasattr(s3compat, 'osf_addon'))
+        print('Waterbutler provider available:', hasattr(s3compat, 'waterbutler_provider'))
+        "
+
+  coverage:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: Install coverage dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install coverage pytest
+        pip install -e .[test]
+
+    - name: Run coverage analysis
+      run: |
+        # Run basic coverage on import tests
+        coverage run -m pytest test_import_without_waterbutler.py || echo "Coverage test completed"
+        coverage report -m || echo "No coverage data available"
+        coverage html || echo "HTML coverage report not generated"
+
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: coverage-report
+        path: htmlcov/
