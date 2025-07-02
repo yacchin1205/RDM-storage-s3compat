@@ -116,11 +116,37 @@ jobs:
             print(f'Error checking package metadata: {e}')
         "
 
-  compatibility:
+  compatibility-python36:
+    runs-on: ubuntu-latest
+    container: python:3.6-slim-buster
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install system dependencies
+      run: |
+        apt-get update
+        apt-get install -y git
+
+    - name: Test Python 3.6 compatibility
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        python -c "
+        import sys
+        print(f'Python version: {sys.version}')
+        import s3compat
+        print('s3compat imported successfully')
+        print('OSF addon available:', hasattr(s3compat, 'osf_addon'))
+        print('Waterbutler provider available:', hasattr(s3compat, 'waterbutler_provider'))
+        "
+
+  compatibility-modern:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
     
     steps:
     - name: Checkout code

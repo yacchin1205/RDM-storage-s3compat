@@ -10,20 +10,16 @@ on:
 jobs:
   test-osf-integration:
     runs-on: ubuntu-latest
+    container: python:3.6-slim-buster
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Python 3.6
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.6'
-
     - name: Install system dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y gettext
+        apt-get update
+        apt-get install -y gettext git
 
     - name: Install OSF-style dependencies
       run: |
@@ -85,15 +81,16 @@ jobs:
 
   test-waterbutler-integration:
     runs-on: ubuntu-latest
+    container: python:3.6-slim-buster
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Python 3.6
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.6'
+    - name: Install system dependencies
+      run: |
+        apt-get update
+        apt-get install -y git
 
     - name: Install waterbutler-style dependencies
       run: |

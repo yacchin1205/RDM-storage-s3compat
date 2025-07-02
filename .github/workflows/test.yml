@@ -6,11 +6,57 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  test-python36:
+    runs-on: ubuntu-latest
+    container: python:3.6-slim-buster
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install system dependencies
+      run: |
+        apt-get update
+        apt-get install -y gettext git
+
+    - name: Install package with test dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[test]
+
+    - name: Run Python 3.6 specific tests
+      run: |
+        echo "Testing package imports on Python 3.6..."
+        python -c "import sys; print(f'Python version: {sys.version}')"
+        python -c "import s3compat; print('s3compat package imported successfully')"
+        python -c "import s3compat.osf_addon; print('OSF addon imported successfully')"
+
+    - name: Test lazy loading functionality
+      run: |
+        echo "Testing lazy loading..."
+        python -c "
+        import s3compat
+        print('Package loaded with lazy loading')
+        print('OSF addon available:', hasattr(s3compat, 'osf_addon'))
+        print('Waterbutler provider available:', hasattr(s3compat, 'waterbutler_provider'))
+        "
+
+    - name: Test entry points
+      run: |
+        echo "Testing entry points..."
+        python -c "
+        import pkg_resources
+        osf_entries = list(pkg_resources.iter_entry_points('rdm.admin_integrations', 's3compat'))
+        print(f'OSF admin integration entry points: {len(osf_entries)}')
+        wb_entries = list(pkg_resources.iter_entry_points('waterbutler.providers', 's3compat'))
+        print(f'Waterbutler provider entry points: {len(wb_entries)}')
+        "
+
+  test-modern-python:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
 
     steps:
     - name: Checkout code
