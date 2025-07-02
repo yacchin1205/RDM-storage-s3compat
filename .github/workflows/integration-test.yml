@@ -267,10 +267,15 @@ jobs:
         echo "Testing translation functionality..."
         python -c "
         import os
-        import s3compat.osf_addon
+        import importlib.util
         
-        # Check for translation directories
-        addon_dir = os.path.dirname(s3compat.osf_addon.__file__)
+        # Check for translation directories without importing OSF addon
+        spec = importlib.util.find_spec('s3compat.osf_addon')
+        if spec is None:
+            raise Exception('osf_addon module not found')
+        
+        # Get the addon directory path safely
+        addon_dir = spec.submodule_search_locations[0]
         locale_dir = os.path.join(addon_dir, 'locale')
         
         if os.path.exists(locale_dir):
@@ -281,4 +286,14 @@ jobs:
                     print(f'Translation directory: {item}')
         else:
             print('No locale directory found (this is okay)')
+        
+        # Check for template files that might need translation
+        templates_dir = os.path.join(addon_dir, 'templates')
+        if os.path.exists(templates_dir):
+            print('Templates directory exists')
+        
+        # Check for static files (which might contain translatable strings)
+        static_dir = os.path.join(addon_dir, 'static')
+        if os.path.exists(static_dir):
+            print('Static files directory exists')
         "
